@@ -1,0 +1,347 @@
+openapi: 3.0.0
+info:
+  title: Social Network API
+  version: 1.0.0
+paths:
+  /api/register:
+    post:
+      summary: Register a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+                firstName:
+                  type: string
+                lastName:
+                  type: string
+      responses:
+        '201':
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  token:
+                    type: string
+                  user:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      email:
+                        type: string
+                      firstName:
+                        type: string
+                      lastName:
+                        type: string
+        '400':
+          description: Email already registered
+        '500':
+          description: Registration failed
+  /api/login:
+    post:
+      summary: Login a user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  token:
+                    type: string
+                  user:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      email:
+                        type: string
+                      firstName:
+                        type: string
+                      lastName:
+                        type: string
+        '400':
+          description: Invalid email or password
+        '500':
+          description: Login failed
+  /api/profile:
+    get:
+      summary: Get user profile
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: User profile data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    type: object
+        '401':
+          description: Authentication token missing or invalid
+        '404':
+          description: User not found
+        '500':
+          description: Failed to get profile
+    put:
+      summary: Update user profile
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                firstName:
+                  type: string
+                lastName:
+                  type: string
+                bio:
+                  type: string
+                avatar:
+                  type: string
+      responses:
+        '200':
+          description: Profile updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  user:
+                    type: object
+        '400':
+          description: Avatar size exceeds limit
+        '401':
+          description: Authentication token missing or invalid
+        '404':
+          description: User not found
+        '500':
+          description: Failed to update profile
+  /api/user/{userId}:
+    get:
+      summary: Get user by ID
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: User data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    type: object
+        '404':
+          description: User not found
+        '500':
+          description: Failed to get user
+  /api/add-friend:
+    post:
+      summary: Add a friend
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                friendId:
+                  type: string
+      responses:
+        '200':
+          description: Friend added successfully
+        '400':
+          description: User is already a friend
+        '401':
+          description: Authentication token missing or invalid
+        '404':
+          description: User or friend not found
+        '500':
+          description: Failed to add friend
+  /api/posts:
+    post:
+      summary: Create a new post
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                content:
+                  type: string
+                images:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        '201':
+          description: Post created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  post:
+                    type: object
+        '400':
+          description: Image size exceeds limit
+        '401':
+          description: Authentication token missing or invalid
+        '500':
+          description: Failed to create post
+  /api/feed:
+    get:
+      summary: Get user feed (posts from friends and self)
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Feed data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  posts:
+                    type: array
+                    items:
+                      type: object
+        '401':
+          description: Authentication token missing or invalid
+        '404':
+          description: User not found
+        '500':
+          description: Failed to get feed
+  /api/posts/{userId}:
+    get:
+      summary: Get user's posts
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: User's posts
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  posts:
+                    type: array
+                    items:
+                      type: object
+        '500':
+          description: Failed to get user posts
+  /api/posts/{postId}/like:
+    post:
+      summary: Like a post
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: postId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Post liked successfully
+        '400':
+          description: Post already liked
+        '401':
+          description: Authentication token missing or invalid
+        '404':
+          description: Post not found
+        '500':
+          description: Failed to like post
+  /api/posts/{postId}/comment:
+    post:
+      summary: Comment on a post
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: postId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                content:
+                  type: string
+      responses:
+        '200':
+          description: Comment added successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  post:
+                    type: object
+        '401':
+          description: Authentication token missing or invalid
+        '404':
+          description: Post not found
+        '500':
+          description: Failed to comment on post
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
