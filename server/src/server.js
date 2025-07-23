@@ -13,8 +13,7 @@ app.use(bodyParser.json({ limit: '2mb' }));
 app.use(bodyParser.urlencoded({ extended: true }));
 
 // Connect to MongoDB
-const MONGO_URI = 'mongodb://localhost:27017/social_network';
-mongoose.connect(MONGO_URI, {
+mongoose.connect(process.env.MONGO_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 })
